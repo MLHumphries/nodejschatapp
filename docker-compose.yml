@@ -1,6 +1,6 @@
 version: '3.3'
 services:
-  snake:
+  chatapp:
     image: 'mlhumphries/nodejschatapp'
     environment:
       - "PORT:3000"
