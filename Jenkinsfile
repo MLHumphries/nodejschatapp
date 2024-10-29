@@ -6,11 +6,6 @@ node('ubuntu-appServer-conTest')
         /* Let's make sure we have the repository cloned to our workspace */
         checkout scm
     }
-    
-    // stage("Snyk-Test")
-    // {
-    //     echo "Snyk test"
-    // }
 
     stage('Build-and-Tag')
     {
