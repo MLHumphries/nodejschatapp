@@ -1,4 +1,4 @@
 FROM mhart/alpine-node
-COPY . /public
-CMD node /public/chat.js
+COPY . /app
+CMD node /index.js
 EXPOSE 3000
