@@ -1,4 +1,4 @@
-node('appserver_softSec')
+node('appserver_softsec')
 {
     def app
     stage('Cloning Git')
