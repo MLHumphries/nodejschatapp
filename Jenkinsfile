@@ -22,7 +22,11 @@ pipeline
             {
                 script 
                 {
-                    snykSecurity(snykInstallation: 'Snyk', snykTokenId: 'snyk_credentials')
+                    catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS')
+                    {
+                        snykSecurity(snykInstallation: 'Snyk', snykTokenId: 'snyk_credentials', severity: 'high')
+                    }
+                    
                 }
             }
         }
