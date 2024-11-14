@@ -22,7 +22,7 @@ pipeline
             {
                 script 
                 {
-                    snykSecurity(snykInstallation: 'Snyk', snykTokenId: 'snyk_credentials', severity: 'high')
+                    snykSecurity(snykInstallation: 'Snyk', snykTokenId: 'snyk_credentials')
                 }
             }
         }
