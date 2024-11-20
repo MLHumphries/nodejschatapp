@@ -1,32 +1,102 @@
-node('appserver_softsec')
+pipeline 
 {
-    def app
-    stage('Cloning Git')
+    agent none
+    stages 
     {
-        /* Let's make sure we have the repository cloned to our workspace */
-        checkout scm
-    }
-
-    stage('Build-and-Tag')
-    {
-        /* This builds the actual image;
-            * This is synonymous to docker build on the command line */
-        app = docker.build('mlhumphries/nodejschatapp')
-    }
-    
-    stage('Post-to-dockerhub')
-    {
-        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_credentials')
+        stage('CLONE GIT REPOSITORY') 
         {
-            app.push('latest')
-        }
-    
-    }
-    
-    stage('Deploy')
-    {
-        sh "docker-compose down"
-        sh "docker-compose up -d"
-    }
+            agent 
+            {
+                label 'appserver_softsec'
+            }
+            steps 
+            {
+                checkout scm
+            }
+        }  
  
+        stage('SCA-SAST-SNYK') 
+        {
+            agent any
+            steps 
+            {
+                script 
+                {
+                    catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS')
+                    {
+                        snykSecurity(snykInstallation: 'Snyk', snykTokenId: 'snyk_credentials', severity: 'high')
+                    }
+                    
+                }
+            }
+        }
+ 
+        stage('SonarQube Analysis') 
+        {
+            agent 
+            {
+                label 'appserver_softsec'
+            }
+            steps 
+            {
+                script 
+                {
+                    def scannerHome = tool 'sonarqube'
+                    withSonarQubeEnv('sonarqube') 
+                    {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=chatapp \
+                            -Dsonar.sources=."
+                    }
+                }
+            }
+        }
+ 
+        stage('BUILD-AND-TAG') 
+        {
+            agent 
+            {
+                label 'appserver_softsec'
+            }
+            steps 
+            {
+                script 
+                {
+                    def app = docker.build("mlhumphries/nodejschatapp")
+                    app.tag("latest")
+                }
+            }
+        }
+ 
+        stage('POST-TO-DOCKERHUB') 
+        {    
+            agent 
+            {
+                label 'appserver_softsec'
+            }
+            steps {
+                script 
+                {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_credentials') 
+                    {
+                        def app = docker.image("mlhumphries/nodejschatapp")
+                        app.push("latest")
+                    }
+                }
+            }
+        }
+ 
+        stage('DEPLOYMENT') 
+        {    
+            agent 
+            {
+                label 'appserver_softsec'
+            }
+            steps 
+            {
+                sh "docker-compose down"
+                sh "docker-compose up -d"   
+            }
+        }
+    }
 }
