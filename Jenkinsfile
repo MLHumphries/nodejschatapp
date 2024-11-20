@@ -45,7 +45,7 @@ pipeline
                     withSonarQubeEnv('sonarqube') 
                     {
                         sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=chatapp \
+                            -Dsonar.projectKey=chat-application \
                             -Dsonar.sources=."
                     }
                 }
